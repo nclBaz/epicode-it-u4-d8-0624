@@ -1,7 +1,13 @@
+import com.github.javafaker.Faker;
 import entities.User;
 import functional_interfaces.StringModifier;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class Main {
 	public static void main(String[] args) {
@@ -44,11 +50,49 @@ public class Main {
 		Predicate<User> isAgeMoreThan17 = user -> user.getAge() > 17;
 
 		System.out.println(isAgeMoreThan17.test(aldo));
+
+		// ------------------------------------------------------ SUPPLIER ---------------------------------------------------------------
+		Supplier<Integer> randomIntSupplier = () -> {
+			Random rndm = new Random();
+			return rndm.nextInt(1, 10000);
+		};
+
+		List<Integer> randomNumbers = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			randomNumbers.add(randomIntSupplier.get());
+		}
+
+		System.out.println(randomNumbers);
+
+		Supplier<User> usersSupplier = () -> {
+			Faker faker = new Faker(Locale.ITALY);
+			Random rndm = new Random();
+			return new User(faker.lordOfTheRings().character(), faker.name().lastName(), rndm.nextInt(1, 100));
+		};
+
+		List<User> randomUsers = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			randomUsers.add(usersSupplier.get());
+		}
+
+
+		Supplier<List<User>> randomListSupplier = () -> {
+			List<User> usersList = new ArrayList<>();
+			for (int i = 0; i < 100; i++) {
+				usersList.add(usersSupplier.get());
+			}
+			return usersList;
+		};
+
+		randomUsers.forEach(user -> System.out.println(user));
+		// randomUsers.forEach(System.out::println); <-- Alternativa al codice di sopra più compatta
+
+
 	}
 }
 
 /* Prima di Java 8 e dell'avvento delle LAMBDA FUNCTIONS avrei dovuto
-crearmi classi che implemementano l'interfaccia per poter avere quei metodi
+crearmi classi che implementino l'interfaccia per poter avere quei metodi
 public class DotsWrapper implements StringModifier{
 
 	@Override
