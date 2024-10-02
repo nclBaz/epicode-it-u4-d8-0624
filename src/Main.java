@@ -1,6 +1,5 @@
 import com.github.javafaker.Faker;
 import entities.User;
-import functional_interfaces.StringModifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +7,12 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class Main {
 	public static void main(String[] args) {
 
-		StringModifier dotsWrapper = str -> "..." + str + "...";
+	/*	StringModifier dotsWrapper = str -> "..." + str + "...";
 		StringModifier starsWrapper = str -> "***" + str + "***";
 		// L'interfaccia di riferimento deve essere funzionale perché
 		// così la lambda va ad implementare esattamente quell'unico metodo
@@ -84,9 +84,64 @@ public class Main {
 			return usersList;
 		};
 
-		randomUsers.forEach(user -> System.out.println(user));
+		randomUsers.forEach(user -> System.out.println(user));*/
 		// randomUsers.forEach(System.out::println); <-- Alternativa al codice di sopra più compatta
 
+
+		// ------------------------------------------------------ STREAMS - FILTER ---------------------------------------------------------------
+
+		Supplier<Integer> randomIntSupplier = () -> {
+			Random rndm = new Random();
+			return rndm.nextInt(1, 10000);
+		};
+
+		List<Integer> randomNumbers = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			randomNumbers.add(randomIntSupplier.get());
+		}
+
+		Supplier<User> usersSupplier = () -> {
+			Faker faker = new Faker(Locale.ITALY);
+			Random rndm = new Random();
+			return new User(faker.lordOfTheRings().character(), faker.name().lastName(), rndm.nextInt(1, 100));
+		};
+
+		Supplier<List<User>> randomListSupplier = () -> {
+			List<User> usersList = new ArrayList<>();
+			for (int i = 0; i < 100; i++) {
+				usersList.add(usersSupplier.get());
+			}
+			return usersList;
+		};
+
+		List<User> randomUsers = randomListSupplier.get();
+		// Gli Stream vanno sempre APERTI utilizzando .stream(), così facendo potrò sbloccare tutta una serie di operazioni INTERMEDIE
+		// tipo .filter(), .map(), ecc. alla fine però per poter ottenere un qualche risultato utilizzabile dovrò anche CHIUDERE lo Stream
+		// Chiudere lo Stream si può fare in più modi, ad esempio posso utilizzare un .forEach per magari stampare in console tutti gli elementi
+		randomNumbers.forEach(number -> System.out.println(number));
+		Stream<Integer> stream = randomNumbers.stream().filter(number -> number < 500 && number > 200);
+		System.out.println("FILTER");
+		stream.forEach(number -> System.out.println(number));
+
+		// Nei filter posso o usare delle lambda scritte 'al volo' oppure anche magari utilizzare dei Predicate scritti in precedenza
+		Predicate<Integer> isMoreThanZero = number -> number > 0;
+		Predicate<Integer> isLessThanHundred = number -> number < 100;
+		System.out.println("------------");
+		randomNumbers.stream().filter(isMoreThanZero.and(isLessThanHundred)).forEach(num -> System.out.println(num));
+
+		System.out.println("FILTER CON GLI USER");
+		Predicate<User> isAgeLessThan18 = user -> user.getAge() < 18;
+		randomUsers.stream().filter(isAgeLessThan18).forEach(user -> System.out.println(user));
+
+
+		// ------------------------------------------------------ STREAMS - MAP ---------------------------------------------------------------
+		System.out.println("------------------------------------------------------ STREAMS - MAP ---------------------------------------------------------------");
+		randomUsers.stream().map(user -> user.getAge()).forEach(age -> System.out.println(age));
+		// randomUsers.stream().map(User::getAge).forEach(System.out::println); // <-- Equivalente alla riga sopra
+		randomUsers.stream().map(user -> user.getName()).forEach(name -> System.out.println(name));
+
+		System.out.println("------------------------------------------------------ STREAMS - FILTER & MAP ---------------------------------------------------------------");
+		randomUsers.stream().filter(user -> user.getAge() > 20).map(user -> user.getName()).forEach(name -> System.out.println(name));
 
 	}
 }
