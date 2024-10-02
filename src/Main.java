@@ -1,12 +1,15 @@
 import com.github.javafaker.Faker;
 import entities.User;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
@@ -142,6 +145,59 @@ public class Main {
 
 		System.out.println("------------------------------------------------------ STREAMS - FILTER & MAP ---------------------------------------------------------------");
 		randomUsers.stream().filter(user -> user.getAge() > 20).map(user -> user.getName()).forEach(name -> System.out.println(name));
+
+		System.out.println("---------------------------------------------------- COME TERMINARE GLI STREAMS --------------------------------------------------------------------");
+
+		System.out.println("------------------------------------------------------ STREAMS - ALLMATCH & ANYMATCH ---------------------------------------------------------------");
+		// .some() e .every() di JS corrispondono a .anyMatch() e .allMatch() di Java
+		// Controllano se ALMENO UN elemento (.some e .anyMatch) della lista passa una certa condizione
+		// oppure se TUTTI gli elementi (.every e .allMatch) passano la condizione
+		// Entrambi ritornano un BOOLEANO
+
+		if (randomUsers.stream().allMatch(user -> user.getAge() > 17)) {
+			System.out.println("Sono tutti maggiorenni");
+		} else {
+			System.out.println("C'è qualche minorenne");
+		}
+
+		if (randomUsers.stream().anyMatch(user -> user.getAge() > 17)) {
+			System.out.println("C'è almeno un maggiorenne");
+		} else {
+			System.out.println("Sono tutti minorenni");
+		}
+
+
+		System.out.println("------------------------------------------------------ STREAMS - REDUCE ---------------------------------------------------------------");
+		int totale = randomUsers.stream()
+				.filter(user -> user.getAge() < 18)
+				.map(user -> user.getAge())
+				.reduce(0, (accumulatore, elementoCorrente) -> accumulatore + elementoCorrente);
+		System.out.println(totale);
+
+
+		System.out.println("------------------------------------------------------ STREAMS - COME OTTENERE UNA LISTA DA UNO STREAM ---------------------------------------------------------------");
+		List<Integer> usersAges = randomUsers.stream()
+				.filter(user -> user.getAge() < 18)
+				.map(user -> user.getAge())
+				.collect(Collectors.toList());
+
+		List<User> minorenni = randomUsers.stream()
+				.filter(user -> user.getAge() < 18)
+				.toList(); // .toList() è un'alternativa equivalente al .collect di sopra però ben più compatta
+
+		System.out.println("------------------------------------------------------ DATE ---------------------------------------------------------------");
+		LocalDate today = LocalDate.now();
+		System.out.println(today);
+
+		System.out.println("La data di domani è: " + today.plusDays(1));
+		System.out.println("Il giorno di oggi lo scorso anno era: " + today.minusYears(1));
+
+		LocalDate date = LocalDate.parse("2024-12-01");
+		LocalDate date2 = LocalDate.of(2024, 12, 1);
+
+		LocalDateTime orario = LocalDateTime.now();
+		System.out.println(orario);
+
 
 	}
 }
